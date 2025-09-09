@@ -1,4 +1,4 @@
-import { buildApp } from '../src/webhook';
+import { buildApp } from '../src/webhook.js';
 
 const app = buildApp();
 
