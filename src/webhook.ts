@@ -1,9 +1,9 @@
 import 'dotenv/config';
 import express, { type Request, type Response } from 'express';
 import { Telegraf } from 'telegraf';
-import { BotController } from './bot/BotController';
-import { env } from './env';
-import { loadLocale } from './services/i18n';
+import { BotController } from './bot/BotController.js';
+import { env } from './env.js';
+import { loadLocale } from './services/i18n.js';
 
 export function buildApp() {
   loadLocale(env.LOCALE);

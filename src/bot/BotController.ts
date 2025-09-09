@@ -1,6 +1,6 @@
 import type { Telegraf } from 'telegraf';
-import { t } from '../services/i18n';
-import { logger } from '../logger';
+import { t } from '../services/i18n.js';
+import { logger } from '../logger.js';
 
 type Cfg = { adminChatId: string | number };
 
