@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "builds": [{ "src": "api/telegram.ts", "use": "@vercel/node@3" }],
+  "routes": [
+    { "src": "/api/telegram/.*", "dest": "api/telegram.ts" },
+    { "src": "/api/health", "dest": "api/telegram.ts" }
+  ]
+}
