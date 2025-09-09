@@ -1,0 +1,5 @@
+{
+  "start": "Send your message.",
+  "thanks": "Thank you! Message received.",
+  "error": "This type of message is not supported yet."
+}
