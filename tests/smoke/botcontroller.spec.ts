@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
-import { BotController } from '../../src/bot/BotController';
+import { BotController } from '../../src/bot/bot-controller';
 import { loadLocale, t } from '../../src/services/i18n';
-import { FakeBot } from '../_helpers/fakeBot';
+import { FakeBot } from '../_helpers/fake-bot';
 
 const ADMIN_CHAT_ID = 123456;
 

@@ -1,4 +1,5 @@
 import type { Telegraf } from 'telegraf';
+import { formatHeader } from '../services/format';
 import { t } from '../services/i18n.js';
 import { logger } from '../logger.js';
 
@@ -54,6 +55,25 @@ export class BotController {
       }
       logger.info({ event: 'unsupported', from: ctx.from.id, kind: ctx.updateType });
       await ctx.reply(t('error'));
+    });
+
+    bot.on('message', async (ctx) => {
+      try {
+        const adminChatId = this.cfg.adminChatId;
+        const headerText = formatHeader(ctx.from, ctx.message);
+
+        // 1) інформація про відправника
+        await ctx.telegram.sendMessage(adminChatId, headerText);
+
+        // 2) оригінал
+        await ctx.telegram.forwardMessage(
+          adminChatId,
+          ctx.chat?.id ?? 0,
+          ctx.message?.message_id as number,
+        );
+      } catch (err) {
+        console.error('forward failed', err);
+      }
     });
   }
 }
