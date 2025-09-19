@@ -33,7 +33,7 @@ describe('BotController (smoke)', () => {
 
   beforeEach(() => {
     bot = new FakeBot();
-    new BotController({ adminChatId: ADMIN_CHAT_ID }).wire(bot);
+    new BotController({ adminChatId: ADMIN_CHAT_ID }).wire(bot as any);
   });
 
   it('should reply with start message on /start', async () => {

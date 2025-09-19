@@ -62,10 +62,8 @@ export class BotController {
         const adminChatId = this.cfg.adminChatId;
         const headerText = formatHeader(ctx.from, ctx.message);
 
-        // 1) інформація про відправника
         await ctx.telegram.sendMessage(adminChatId, headerText);
 
-        // 2) оригінал
         await ctx.telegram.forwardMessage(
           adminChatId,
           ctx.chat?.id ?? 0,

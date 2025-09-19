@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { loadLocale, t } from '../../src/services/i18n';
 
-// spies used by the mock
 const deleteWebhook = vi.fn().mockResolvedValue(true);
 const getMe = vi.fn().mockResolvedValue({ id: 1, username: 'testbot' });
 const launch = vi.fn().mockResolvedValue(undefined);
@@ -25,7 +24,6 @@ vi.mock('telegraf', () => {
         return launch();
       }
 
-      // helper for the test
       async simulateStart(ctx: any) {
         await this.handlers.start?.[0]?.(ctx);
       }
@@ -33,7 +31,6 @@ vi.mock('telegraf', () => {
   };
 });
 
-// after the mock
 import { startBot } from '../../src/bot/entry';
 
 describe('startBot (integration-lite)', () => {
