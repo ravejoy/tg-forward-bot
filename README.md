@@ -8,14 +8,15 @@
 A simple Telegram bot that forwards all user messages (text, images, videos, links) to a specified admin chat.
 
 ## Features
-- Forwards **text, images, videos, and links** as-is to admin chat  
-- Built with **TypeScript** + **Telegraf**  
-- Configurable via `.env` (token, admin chat, locale with i18n support: `en`, `uk`, `ru`)  
+
+- Forwards **text, images, videos, and links** as-is to admin chat
+- Built with **TypeScript** + **Telegraf**
+- Configurable via `.env` (token, admin chat, locale with i18n support: `en`, `uk`, `ru`)
 - **Vitest** tests included:
   - smoke unit tests for controller
-  - integration-lite test for entry point  
-- Code style enforced with **ESLint** + **Prettier**  
-- Husky + lint-staged pre-commit checks  
+  - integration-lite test for entry point
+- Code style enforced with **ESLint** + **Prettier**
+- Husky + lint-staged pre-commit checks
 - Ready for deployment on **Vercel** (serverless webhook)
 
 ---
@@ -23,17 +24,20 @@ A simple Telegram bot that forwards all user messages (text, images, videos, lin
 ## Getting Started
 
 ### 1. Clone repository
+
 ```bash
 git clone https://github.com/ravejoy/tg-forward-bot.git
 cd tg-forward-bot
 ```
 
 ### 2. Install dependencies
+
 ```bash
 npm install
 ```
 
 ### 3. Configure environment
+
 Create a `.env` file in the project root (see `.env.example`):
 
 ```ini
@@ -46,17 +50,20 @@ WEBHOOK_SECRET=your-webhook-secret
 ```
 
 ### 4. Run in development
+
 ```bash
 npm run dev
 ```
 
 ### 5. Build and run in production
+
 ```bash
 npm run build
 npm start
 ```
 
 ### 6. Run tests
+
 ```bash
 npm run test             # all tests
 npm run test:smoke       # smoke unit tests only
@@ -67,14 +74,14 @@ npm run test:integration # integration-lite only
 
 ## Deploying to Vercel
 
-1. Push your repo to GitHub  
-2. Import the repository into [Vercel](https://vercel.com)  
+1. Push your repo to GitHub
+2. Import the repository into [Vercel](https://vercel.com)
 3. In project settings → **Environment Variables**, add:
    - `BOT_TOKEN`
    - `ADMIN_CHAT_ID`
    - `LOCALE`
-   - `WEBHOOK_SECRET`  
-4. Deploy project  
+   - `WEBHOOK_SECRET`
+4. Deploy project
 5. Set Telegram webhook (replace placeholders):
    ```bash
    curl -X POST "https://api.telegram.org/bot<BOT_TOKEN>/setWebhook"      -H "Content-Type: application/json"      -d "{\"url\":\"https://<your-vercel-domain>.vercel.app/api/telegram/<WEBHOOK_SECRET>\"}"
@@ -87,6 +94,7 @@ npm run test:integration # integration-lite only
 ---
 
 ## Project structure
+
 ```
 src/
   bot/        # BotController, entry point
@@ -107,6 +115,7 @@ tests/
 ---
 
 ## License
+
 MIT License
 
 Copyright (c) 2025 Nazarii Tsyhaniuk
