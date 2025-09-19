@@ -1,5 +1,5 @@
 import type { Telegraf } from 'telegraf';
-import { formatHeader } from '../services/format';
+import { formatHeader } from '../services/format.js';
 import { t } from '../services/i18n.js';
 import { logger } from '../logger.js';
 
