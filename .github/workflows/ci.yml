@@ -5,7 +5,6 @@ on:
     branches: ['**']
   pull_request:
     branches: ['**']
-  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -54,16 +53,40 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      - name: Build
-        run: npm run build
+      - name: Pull Vercel settings (preview)
+        run: npx vercel pull --yes --environment=preview
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
-      - name: Vercel prebuild (prod config)
-        run: npx vercel build --prod
+      - name: Vercel prebuild (preview)
+        run: npx vercel build
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
-      - name: Upload prebuilt output
+      - name: Upload prebuilt output (preview)
         uses: actions/upload-artifact@v4
         with:
-          name: vercel-output
+          name: vercel-output-preview
+          path: .vercel/output
+
+      - name: Pull Vercel settings (production)
+        run: npx vercel pull --yes --environment=production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Vercel prebuild (prod)
+        run: npx vercel build --prod
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Upload prebuilt output (prod)
+        uses: actions/upload-artifact@v4
+        with:
+          name: vercel-output-prod
           path: .vercel/output
 
   deploy_preview:
@@ -73,15 +96,14 @@ jobs:
     if: github.event_name == 'pull_request'
     permissions:
       pull-requests: write
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download prebuilt output
+      - name: Download prebuilt (preview)
         uses: actions/download-artifact@v4
         with:
-          name: vercel-output
+          name: vercel-output-preview
           path: .vercel/output
 
       - name: Deploy prebuilt to Vercel (preview)
@@ -113,15 +135,14 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download prebuilt output
+      - name: Download prebuilt (prod)
         uses: actions/download-artifact@v4
         with:
-          name: vercel-output
+          name: vercel-output-prod
           path: .vercel/output
 
       - name: Deploy prebuilt to Vercel (prod)
