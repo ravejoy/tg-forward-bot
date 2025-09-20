@@ -1,9 +1,9 @@
 import 'dotenv/config';
 
-import { env } from './env';
-import { logger } from './logger';
-import { loadLocale } from './services/i18n';
-import { startBot } from './bot/entry';
+import { env } from './env.js';
+import { logger } from './logger.js';
+import { loadLocale } from './services/i18n.js';
+import { startBot } from './bot/entry.js';
 
 async function bootstrap() {
   loadLocale(env.LOCALE);

@@ -1,6 +1,6 @@
 import { Telegraf } from 'telegraf';
-import { logger } from '../logger';
-import { BotController } from './bot-controller';
+import { logger } from '../logger.js';
+import { BotController } from './bot-controller.js';
 
 export async function startBot(token: string, cfg: { adminChatId: string | number }) {
   if (!token) throw new Error('Missing BOT_TOKEN');

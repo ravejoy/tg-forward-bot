@@ -1,7 +1,7 @@
 import type { Telegraf, Context } from 'telegraf';
-import { formatUserInfo } from '../services/format';
-import { t } from '../services/i18n';
-import { logger } from '../logger';
+import { formatUserInfo } from '../services/format.js';
+import { t } from '../services/i18n.js';
+import { logger } from '../logger.js';
 
 type Cfg = { adminChatId: number | string };
 
