@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from 'fs';
+import path from 'path';
 
 type Dict = Record<string, string>;
 
@@ -13,14 +13,14 @@ function interpolate(s: string, params?: Record<string, string | number>) {
 }
 
 export function loadLocale(code: string) {
-  const safe = ["en", "ru", "uk"].includes(code) ? code : "en";
-  const base = path.join(process.cwd(), "locales");
+  const safe = ['en', 'ru', 'uk'].includes(code) ? code : 'en';
+  const base = path.join(process.cwd(), 'locales');
 
-  const enPath = path.join(base, "en.json");
-  fallback = JSON.parse(fs.readFileSync(enPath, "utf-8")) as Dict;
+  const enPath = path.join(base, 'en.json');
+  fallback = JSON.parse(fs.readFileSync(enPath, 'utf-8')) as Dict;
 
   const locPath = path.join(base, `${safe}.json`);
-  dict = JSON.parse(fs.readFileSync(locPath, "utf-8")) as Dict;
+  dict = JSON.parse(fs.readFileSync(locPath, 'utf-8')) as Dict;
 }
 
 export function t(key: string, params?: Record<string, string | number>) {

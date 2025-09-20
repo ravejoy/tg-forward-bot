@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express, { type Request, type Response } from 'express';
 import { Telegraf } from 'telegraf';
+import { logger } from './logger';
 import { BotController } from './bot/bot-controller.js';
 import { env } from './env.js';
 import { loadLocale } from './services/i18n.js';
@@ -21,6 +22,7 @@ export function buildApp() {
       await bot.handleUpdate(req.body, res);
       if (!res.headersSent) res.status(200).end();
     } catch (err) {
+      logger.error({ err }, 'webhook error');
       if (!res.headersSent) res.status(500).send('error');
     }
   });
