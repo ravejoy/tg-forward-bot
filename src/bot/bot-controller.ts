@@ -1,5 +1,4 @@
 import type { Telegraf, Context } from 'telegraf';
-import { formatUserInfo } from '../services/format.js';
 import { t } from '../services/i18n.js';
 import { logger } from '../logger.js';
 
@@ -13,20 +12,9 @@ export class BotController {
       await ctx.reply(t('start'));
     });
 
-    // one catch-all: any user message
+    // forward everything as-is to admin chat
     bot.on('message', async (ctx: Context) => {
       try {
-        // 1) meta about sender
-        const meta = formatUserInfo({
-          id: Number(ctx.from?.id ?? 0),
-          first_name: ctx.from?.first_name,
-          last_name: ctx.from?.last_name,
-          username: ctx.from?.username,
-        });
-
-        await ctx.telegram.sendMessage(this.cfg.adminChatId, meta);
-
-        // 2) forward original message
         const fromChatId = Number(ctx.chat?.id);
         const msgId = (ctx.message as any)?.message_id;
         if (fromChatId && msgId) {
