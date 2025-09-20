@@ -11,21 +11,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  checks:
-    name: Lint • Typecheck • Tests • Build
+  quality:
+    name: Quality — Lint • Typecheck • Tests
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [18, 20]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node ${{ matrix.node }}
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 20
           cache: 'npm'
 
       - name: Install deps
@@ -40,15 +36,31 @@ jobs:
       - name: Tests
         run: npm run test -- --run
 
+  build:
+    name: Build
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci
+
       - name: Build
         run: npm run build
 
   deploy_preview:
     name: Preview deploy (Vercel) for PR
-    needs: checks
+    needs: [quality, build]
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
-
     permissions:
       pull-requests: write
 
@@ -91,7 +103,7 @@ jobs:
 
   deploy_prod:
     name: Deploy to Vercel (main)
-    needs: checks
+    needs: [quality, build]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
