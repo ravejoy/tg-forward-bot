@@ -1,9 +1,9 @@
-import type { Telegraf } from 'telegraf';
-import { formatHeader } from '../services/format.js';
-import { t } from '../services/i18n.js';
-import { logger } from '../logger.js';
+import type { Telegraf, Context } from 'telegraf';
+import { formatUserInfo } from '../services/format';
+import { t } from '../services/i18n';
+import { logger } from '../logger';
 
-type Cfg = { adminChatId: string | number };
+type Cfg = { adminChatId: number | string };
 
 export class BotController {
   constructor(private cfg: Cfg) {}
@@ -13,65 +13,30 @@ export class BotController {
       await ctx.reply(t('start'));
     });
 
-    bot.on('text', async (ctx) => {
-      const text = ctx.message.text?.trim();
-      if (!text) return;
-
-      await ctx.telegram.sendMessage(this.cfg.adminChatId, text);
-      logger.info({ event: 'forward_text', from: ctx.from.id });
-      await ctx.reply(t('thanks'));
-    });
-
-    bot.on('photo', async (ctx) => {
-      const photos = ctx.message.photo;
-      const best = photos?.[photos.length - 1];
-      if (!best) return;
-
-      const caption = ctx.message.caption?.trim();
-      await ctx.telegram.sendPhoto(
-        this.cfg.adminChatId,
-        best.file_id,
-        caption ? { caption } : undefined,
-      );
-
-      logger.info({ event: 'forward_image', from: ctx.from.id });
-      await ctx.reply(t('thanks'));
-    });
-
-    bot.on('video', async (ctx) => {
-      const fileId = ctx.message.video?.file_id;
-      if (!fileId) return;
-
-      const caption = ctx.message.caption?.trim();
-      await ctx.telegram.sendVideo(this.cfg.adminChatId, fileId, caption ? { caption } : undefined);
-
-      logger.info({ event: 'forward_video', from: ctx.from.id });
-      await ctx.reply(t('thanks'));
-    });
-
-    bot.on('message', async (ctx, next) => {
-      if ('text' in ctx.message || 'photo' in ctx.message || 'video' in ctx.message) {
-        return next();
-      }
-      logger.info({ event: 'unsupported', from: ctx.from.id, kind: ctx.updateType });
-      await ctx.reply(t('error'));
-    });
-
-    bot.on('message', async (ctx) => {
+    // one catch-all: any user message
+    bot.on('message', async (ctx: Context) => {
       try {
-        const adminChatId = this.cfg.adminChatId;
-        const headerText = formatHeader(ctx.from, ctx.message);
+        // 1) meta about sender
+        const meta = formatUserInfo({
+          id: Number(ctx.from?.id ?? 0),
+          first_name: ctx.from?.first_name,
+          last_name: ctx.from?.last_name,
+          username: ctx.from?.username,
+        });
 
-        await ctx.telegram.sendMessage(adminChatId, headerText);
+        await ctx.telegram.sendMessage(this.cfg.adminChatId, meta);
 
-        await ctx.telegram.forwardMessage(
-          adminChatId,
-          ctx.chat?.id ?? 0,
-          ctx.message?.message_id as number,
-        );
+        // 2) forward original message
+        const fromChatId = Number(ctx.chat?.id);
+        const msgId = (ctx.message as any)?.message_id;
+        if (fromChatId && msgId) {
+          await ctx.telegram.forwardMessage(this.cfg.adminChatId, fromChatId, msgId);
+        }
       } catch (err) {
-        console.error('forward failed', err);
+        logger.error({ err }, 'forward failed');
       }
     });
+
+    return this;
   }
 }

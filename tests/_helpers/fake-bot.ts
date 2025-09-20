@@ -1,77 +1,51 @@
-// tests/_helpers/fake-bot.ts
 import { vi } from 'vitest';
 
 type Handler = (ctx: any) => any;
 
 export class FakeBot {
-  private handlers = new Map<string, Handler[]>();
+  private startHandler?: Handler;
+  private messageHandler?: Handler;
 
-  // --- Telegraf-like API that BotController uses -----------------------------
-
-  start(fn: Handler) {
-    this.add('start', fn);
-    return this;
-  }
-
-  on(event: string, fn: Handler) {
-    this.add(event, fn);
-    return this;
-  }
-
-  telegram = {
-    sendMessage: vi.fn().mockResolvedValue(undefined),
-    sendPhoto: vi.fn().mockResolvedValue(undefined),
-    sendVideo: vi.fn().mockResolvedValue(undefined),
-    forwardMessage: vi.fn().mockResolvedValue(undefined),
-    copyMessage: vi.fn().mockResolvedValue(undefined),
+  public telegram = {
+    sendMessage: vi.fn(),
+    forwardMessage: vi.fn(),
   };
 
-  // --- Helpers for tests -----------------------------------------------------
-
-  async trigger(event: string, ctx: Partial<any> = {}) {
-    const baseCtx = this.buildCtx(ctx);
-    const hs = this.handlers.get(event) ?? [];
-    for (const h of hs) {
-      await h(baseCtx);
-    }
+  start(h: Handler) {
+    this.startHandler = h;
+    return this;
+  }
+  on(event: string, h: Handler) {
+    if (event === 'message') this.messageHandler = h;
+    return this;
   }
 
-  async simulateStart(ctx: Partial<any> = {}) {
-    await this.trigger('start', ctx);
-  }
-
-  // --- Internal --------------------------------------------------------------
-
-  private add(event: string, fn: Handler) {
-    const list = this.handlers.get(event) ?? [];
-    list.push(fn);
-    this.handlers.set(event, list);
-  }
-
-  private buildCtx(ctx: Partial<any>) {
-    const reply = vi.fn().mockResolvedValue(undefined);
-
-    const telegram =
-      ctx.telegram ??
-      ({
-        sendMessage: vi.fn().mockResolvedValue(undefined),
-        sendPhoto: vi.fn().mockResolvedValue(undefined),
-        sendVideo: vi.fn().mockResolvedValue(undefined),
-        forwardMessage: vi.fn().mockResolvedValue(undefined),
-        copyMessage: vi.fn().mockResolvedValue(undefined),
-      } as const);
-
-    const from = ctx.from ?? { id: 111, is_bot: false, first_name: 'Test', username: 'test_user' };
-    const chat = ctx.chat ?? { id: 222, type: 'private' };
-
-    return {
-      reply,
-      telegram,
-      from,
-      chat,
-      ...ctx,
+  // simulate /start
+  async simulateStart(ctxExtra: Partial<any> = {}) {
+    const ctx = {
+      reply: vi.fn(),
+      ...ctxExtra,
     };
+    if (!this.startHandler) throw new Error('no start handler');
+    await this.startHandler(ctx);
+    return ctx;
+  }
+
+  // simulate a regular message
+  async simulateMessage(msg: {
+    from: { id: number; first_name?: string; last_name?: string; username?: string };
+    chatId?: number;
+    messageId?: number;
+  }) {
+    const ctx = {
+      from: msg.from,
+      chat: { id: msg.chatId ?? 555 },
+      message: { message_id: msg.messageId ?? 777 },
+      telegram: this.telegram,
+      reply: vi.fn(),
+    };
+    if (!this.messageHandler) throw new Error('no message handler');
+    await this.messageHandler(ctx);
+    return ctx;
   }
 }
-
-export default FakeBot;

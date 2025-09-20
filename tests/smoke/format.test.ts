@@ -1,41 +1,37 @@
 import { describe, it, expect } from 'vitest';
-import { formatHeader } from '../../src/services/format';
+import { formatUserInfo } from '../../src/services/format';
 
-// Test fixtures
-const USER_FULL = {
-  id: 42,
-  first_name: 'Harry',
-  last_name: 'Potter',
-  username: 'chosen1',
-};
-
-const USER_NO_USERNAME = {
-  id: 7,
-  first_name: 'Hermione',
-  // last_name omitted
-  // username omitted
-};
-
-const MSG_TEXT = { text: 'Expelliarmus!' };
-const MSG_PHOTO = { photo: [{ file_id: 'ph1' }] };
-const MSG_VOICE = { voice: { file_id: 'v1' } };
-
-describe('formatHeader (smoke)', () => {
-  it('should format header with full name and username for text message', () => {
-    const result = formatHeader(USER_FULL, MSG_TEXT);
-    expect(result).toContain('From: Harry Potter (@chosen1) (id:42)');
-    expect(result).toContain('Type: text');
+describe('formatUserInfo', () => {
+  it('formats full name + username + id', () => {
+    const result = formatUserInfo({
+      id: 123,
+      first_name: 'Harry',
+      last_name: 'Potter',
+      username: 'thechosenone',
+    });
+    expect(result).toBe('From: Harry Potter (@thechosenone) (id:123)');
   });
 
-  it('should handle missing last_name and username for photo', () => {
-    const result = formatHeader(USER_NO_USERNAME as any, MSG_PHOTO);
-    expect(result).toContain('From: Hermione (id:7)');
-    expect(result).toContain('Type: photo');
+  it('handles missing last name', () => {
+    const result = formatUserInfo({
+      id: 123,
+      first_name: 'Harry',
+      username: 'scarboy',
+    });
+    expect(result).toBe('From: Harry (@scarboy) (id:123)');
   });
 
-  it('should fallback to unknown when sender is missing', () => {
-    const result = formatHeader(undefined, MSG_VOICE);
-    expect(result).toContain('From: unknown');
-    expect(result).toContain('Type: voice');
+  it('handles missing username', () => {
+    const result = formatUserInfo({
+      id: 123,
+      first_name: 'Hermione',
+      last_name: 'Granger',
+    });
+    expect(result).toBe('From: Hermione Granger (id:123)');
+  });
+
+  it('handles completely empty names', () => {
+    const result = formatUserInfo({ id: 999 });
+    expect(result).toBe('From: Unknown (id:999)');
   });
 });
