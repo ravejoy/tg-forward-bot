@@ -60,7 +60,9 @@ jobs:
     name: Preview deploy (Vercel) for PR
     needs: [quality, build]
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: >
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       pull-requests: write
 
