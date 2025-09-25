@@ -1,9 +1,10 @@
 # tg-forward-bot
 
-![Node.js](https://img.shields.io/badge/node-%3E%3D18-green)
-![TypeScript](https://img.shields.io/badge/typescript-5.x-blue)
-![License](https://img.shields.io/badge/license-MIT-yellow)
+[![CI](https://github.com/ravejoy/tg-forward-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/ravejoy/tg-forward-bot/actions/workflows/ci.yml)
 ![Vercel](https://vercelbadge.vercel.app/api/ravejoy/tg-forward-bot)
+![Node.js](https://img.shields.io/badge/node-%3E%3D18-green?logo=nodedotjs)
+![TypeScript](https://img.shields.io/badge/typescript-5.x-blue?logo=typescript)
+![License](https://img.shields.io/badge/license-MIT-yellow)
 
 A simple Telegram bot that forwards all user messages (text, images, videos, links) to a specified admin chat.
 

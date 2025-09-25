@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: npm
 
       - name: Install deps
         run: npm ci
@@ -48,45 +48,74 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: npm
 
       - name: Install deps
         run: npm ci
 
-      - name: Build
-        run: npm run build
+      - name: Pull Vercel settings (preview)
+        run: npx vercel pull --yes --environment=preview
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Vercel prebuild (preview)
+        run: npx vercel build
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Upload prebuilt output (preview)
+        uses: actions/upload-artifact@v4
+        with:
+          name: vercel-output-preview
+          path: .vercel/output
+
+      - name: Pull Vercel settings (production)
+        run: npx vercel pull --yes --environment=production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Vercel prebuild (prod)
+        run: npx vercel build --prod
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Upload prebuilt output (prod)
+        uses: actions/upload-artifact@v4
+        with:
+          name: vercel-output-prod
+          path: .vercel/output
 
   deploy_preview:
     name: Preview deploy (Vercel) for PR
-    needs: [quality, build]
+    needs: build
     runs-on: ubuntu-latest
     if: >
       github.event_name == 'pull_request' &&
       github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       pull-requests: write
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Download prebuilt (preview)
+        uses: actions/download-artifact@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          name: vercel-output-preview
+          path: .vercel/output
 
-      - name: Install deps
-        run: npm ci
-
-      - name: Deploy to Vercel (preview)
+      - name: Deploy prebuilt to Vercel (preview)
         id: vercel
-        uses: amondnet/vercel-action@v25
+        uses: vercel/action@v3
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./
+          prebuilt: true
           prod: false
 
       - name: Comment preview URL to PR
@@ -105,28 +134,24 @@ jobs:
 
   deploy_prod:
     name: Deploy to Vercel (main)
-    needs: [quality, build]
+    needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Download prebuilt (prod)
+        uses: actions/download-artifact@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          name: vercel-output-prod
+          path: .vercel/output
 
-      - name: Install deps
-        run: npm ci
-
-      - name: Deploy to Vercel (prod)
-        uses: amondnet/vercel-action@v25
+      - name: Deploy prebuilt to Vercel (prod)
+        uses: vercel/action@v3
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./
+          prebuilt: true
           prod: true
